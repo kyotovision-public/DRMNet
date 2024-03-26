@@ -1,10 +1,10 @@
 # Diffusion Reflectance Map: Single-Image Stochastic Inverse Rendering of Illumination and Reflectance
 [arXiv](https://arxiv.org/abs/2312.04529)
 
-This repository provides an implementation of our paper Diffusion [Diffusion Reflectance Map: Single-Image Stochastic Inverse Rendering of Illumination and Reflectance](https://arxiv.org/abs/2312.04529). If you use our code and data please cite our paper.
+This repository provides an implementation of our paper [Diffusion Reflectance Map: Single-Image Stochastic Inverse Rendering of Illumination and Reflectance](https://arxiv.org/abs/2312.04529). If you use our code and data please cite our paper.
 This implementation is based on [Latent Diffusion Modles](https://github.com/CompVis/latent-diffusion/).
 
-Please note that this is research software and may contain bugs or other issues – please use it at your own risk. If you experience major problems with it, you may contact us, but please note that we do not have the resources to deal with all issues.
+Please note that this is a research software and may contain bugs or other issues – please use it at your own risk. If you experience major problems with it, you may contact us, but please note that we do not have the resources to deal with all issues.
 
 ```
 @InProceedings{Yenyo_2022_CVPR,
@@ -30,7 +30,7 @@ We tested our code with Python 3.6 on Ubuntu 20.04 LTS using the following packa
 - opencv-python==4.9.0.80
 - omegaconf
 - einops
-- and packages for [Latent Diffusion Modles](https://github.com/CompVis/latent-diffusion?tab=readme-ov-file#requirements) (just imported in this work)
+- and packages for [Latent Diffusion Modles](https://github.com/CompVis/latent-diffusion?tab=readme-ov-file#requirements) (some are imported to avoid errors but not actually used)
 
 Please refer to [environment/pip_freeze.txt](environment/pip_freeze.txt) for the specific versions we used.
 
@@ -45,7 +45,7 @@ singularity run --nv environment/drmnet.sif
 ### Demo
 
 You can download the pretrained models (`drmnet.ckpt` and `obsnet.ckpt`) from [here](https://drive.google.com/drive/folders/1zWkmzOIIwueeUL0ryzK6FU8TtW6g4T6W). Download them and save the files in `./checkpoints`.
-You can apply the model on the sample data in `data` by running the script below.
+You can apply the model on the sample data in the `data` directory by running the script below.
 
 ```bash
 python scripts/estimate.py ./data/sample/image.exr ./data/sample/normal.npy ./data/sample/mask.png
@@ -66,7 +66,8 @@ Please unzip the cached data to `data/cache/` by running:
 unzip <PATH_TO_refmap_cache.zip> -d ./data/cache/refmap
 unzip <PATH_TO_objimg_cache.zip> -d ./data/cache/objimg
 ```
-as:
+
+After unzipping caches, `data/cache` will look like below:
 ```
 data/cache
 ├── /refmap/<BRDF_PARAM_NAMES>/<RESOLUTION_SPP_DENOISER>
@@ -91,18 +92,18 @@ data/cache
 │   │    ...
 ```
 
-Also, You need download masks for reflectance maps to train ObsNet from [here](https://drive.google.com/drive/folders/1zWkmzOIIwueeUL0ryzK6FU8TtW6g4T6W) and unzip the cached data to `data/nLMVS-Synth_refmap_masks/` by running:
+Also, you need download masks for reflectance maps to train ObsNet from [here](https://drive.google.com/drive/folders/1zWkmzOIIwueeUL0ryzK6FU8TtW6g4T6W) and unzip the cached data to `data/nLMVS-Synth_refmap_masks/` by running:
 ```bash
 unzip <PATH_TO_nLMVS-Synth_refmap_masks.zip> -d ./data/nLMVS-Synth_refmap_masks
 ```
 
 
-The training data is made by using following data:
+The training data is made using the following data:
 - HDR Environment maps from [Laval Indoor HDR Dataset](http://vision.gel.ulaval.ca/~jflalonde/publications/projects/deepIndoorLight/index.html) and [Poly Haven](https://polyhaven.com/)
 - 3D mesh models of [Xu et al.](https://cseweb.ucsd.edu/~viscomp/projects/SIG18Relighting/)
 - Normal maps from nLMVS-Synth from [nLMVS-Net](https://github.com/kyotovision-public/nLMVS-Net) 
 
-If you want to train without the above cache, please download HDR Environment maps from the above sites, save them to `./data/LavalIndoor+PolyHaven_2k` in OpenEXR format (`.exr`) with a resolution of 2000x1000. You can use `scripts/preprocess_envmap.py`.
+If you want to train without the above cache, please download HDR Environment maps from the above sites, save them to `./data/LavalIndoor+PolyHaven_2k` in OpenEXR format (`.exr`) with a resolution of 2000x1000. You can use `scripts/preprocess_envmap.py` for this.
 
 Also, please download object shapes from [Xu et al.](https://cseweb.ucsd.edu/~viscomp/projects/SIG18Relighting/) and preprocess them by running:
 ```bash
@@ -112,7 +113,7 @@ python scripts/preprocess_shape.py <PATH_TO_Shapes_Multi_5000>
 
 #### DRMNet
 
-You can training DRMNet by running
+You can train DRMNet by running
 ```bash
 python main.py --base ./configs/inpainting/train_drmnet.yaml -t --device 0
 ```
@@ -120,15 +121,15 @@ The logs and checkpoints are saved to `logs/<START_DATE_AND_TIME>_train_drmnet`.
 
 #### ObsNet
 
-You can training ObsNet by running
+You can train ObsNet by running
 ```bash
 python main.py --base ./configs/inpainting/train_obsnet.yaml -t --device 0
 ```
 The logs and checkpoints are saved to `./logs/<START_DATE_AND_TIME>_train_obsnet`.
 
-Then, please correct `model: params: ckpt_path` in `./configs/inpainting/finetune_obsnet.yaml` to the above directory.
-
-You can finetune ObsNet with raw reflectance maps from random object images by running
+In order to finetune the ObsNet model, you need to modify the configuration file located at `./configs/inpainting/finetune_obsnet.yaml`.
+The default value for `model: params: ckpt_path` is set to `./logs/xxxx-xx-xxTxx-xx-xx_train_obsnet/checkpoints/last.ckpt`.
+To finetune the network using raw reflectance maps from random object images, update this path with the above directory and run:
 ```bash
 python main.py --base ./configs/inpainting/finetune_obsnet.yaml -t --device 0
 ```
