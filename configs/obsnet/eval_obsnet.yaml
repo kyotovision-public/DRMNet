@@ -1,0 +1,47 @@
+model:
+  target: models.obsnet.ObsNetDiffusion
+  params:
+    linear_start: 0.0001
+    linear_end: 0.09
+    log_every_t: 2000
+    timesteps: 1000
+    loss_type: l2
+    first_stage_key: LrK
+    cond_stage_key: raw_refmap
+    padding_mode: noise
+    image_size: 128
+    channels: 3
+    concat_mode: true
+    ddim_steps: 50
+    monitor: val/loss
+    clip_denoised: false
+    masked_loss: false
+    obj_img_key: img
+    ckpt_path: ./checkpoints/obsnet.ckpt
+    init_from_ckpt_verbose: true
+
+    unet_config:
+      target: ldm.modules.diffusionmodules.openaimodel.UNetModel
+      params:
+        image_size: 128
+        in_channels: 6
+        out_channels: 3
+        model_channels: 128
+        attention_resolutions: [4, 8, 16]
+        num_res_blocks: 2
+        channel_mult: [1, 2, 3, 4, 5]
+        num_heads: 1
+        resblock_updown: False
+        conv_resample: False
+
+data:
+  target: main.DataModuleFromConfig
+  params:
+    batch_size: 1
+    num_workers: 5
+    predict:
+      target: dataset.basedataset.BaseDataset
+      params:
+        size: 128
+        transform_func: resize_0p1tom1p1_normalizedLogarithmic_lowerbound1e-6
+        clamp_before_exp: 20

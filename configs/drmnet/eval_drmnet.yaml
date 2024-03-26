@@ -1,0 +1,79 @@
+model:
+  base_learning_rate: 5.0e-05
+  target: models.drmnet.DRMNet
+  params:
+    log_every_k: 5
+    max_timesteps: 150
+    loss_type: l2
+    input_key: LrK
+    image_size: 128
+    channels: 3
+    parameterization: residual
+    cond_stage_trainable: False
+    concat_mode: True
+    scale_factor: 1.0
+    scale_by_std: False
+    monitor: 'val/loss'
+    use_ema: True
+    sigma: 0.02
+    delta: 0.025
+    gamma: 0.95
+    epsilon: 0.01
+    l_refmap_weight: 10.0
+    l_refcode_weight: 0.1
+    brdf_param_names: ["metallic.value", "base_color.value.R", "base_color.value.G", "base_color.value.B", "roughness.value", "specular"]
+    z0: [1, 1, 1, 1, 0, 1]
+    refmap_input_scaler: 0.12
+
+    renderer_config:
+      target: utils.mitsuba3_utils.MitsubaRefMapRenderer
+      params:
+        refmap_res: 128
+        spp: 256
+        denoise: simple
+
+    illnet_config:
+      target: ldm.modules.diffusionmodules.openaimodel.UNetModel
+      params:
+        image_size: 128
+        in_channels: 6
+        out_channels: 3
+        model_channels: 128
+        attention_resolutions: [8, 16, 32]
+        num_res_blocks: 2
+        dropout: 0.0
+        channel_mult: [1, 2, 3, 4, 5, 6]
+        num_heads: 1
+        resblock_updown: False
+        conv_resample: False
+
+    refnet_config:
+      target: ldm.modules.diffusionmodules.openaimodel.EncoderUNetModel
+      params:
+        image_size: 128
+        in_channels: 6
+        model_channels: 128
+        out_channels: 6
+        num_res_blocks: 2
+        attention_resolutions: [8, 16]
+        dropout: 0.0
+        channel_mult: [1, 1, 2, 3, 4]
+        conv_resample: False
+        resblock_updown: False
+        num_heads: 1
+        use_scale_shift_norm: False
+        pool: "adaptive"
+
+    ckpt_path: ./checkpoints/drmnet.ckpt
+
+data:
+  target: main.DataModuleFromConfig
+  params:
+    batch_size: 1
+    num_workers: 3
+    predict:
+      target: dataset.basedataset.BaseDataset
+      params:
+        size: 128
+        transform_func: log
+        clamp_before_exp: 20

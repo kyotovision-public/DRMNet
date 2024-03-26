@@ -1,0 +1,112 @@
+model:
+  base_learning_rate: 1.0e-04
+  target: models.obsnet.ObsNetDiffusion
+  params:
+    linear_start: 0.0001
+    linear_end: 0.09
+    log_every_t: 100
+    timesteps: 1000
+    loss_type: l2
+    first_stage_key: LrK
+    cond_stage_key: masked_LrK
+    padding_mode: noise
+    image_size: 128
+    channels: 3
+    concat_mode: True
+    ddim_steps: 50
+    monitor: val/loss
+    clip_denoised: False
+    masked_loss: False
+    noisy_observe: 0.04
+    cache_data: False
+    refmap_cache_root:
+    objimg_cache_root:
+    envmap_dir:
+
+    renderer_config:
+      target: utils.mitsuba3_utils.MitsubaRefMapRenderer
+      params:
+        refmap_res: 128
+        spp: 256
+        denoise: simple
+        brdf_param_names: ["metallic.value", "base_color.value.R", "base_color.value.G", "base_color.value.B", "roughness.value", "specular"]
+
+    scheduler_config:
+      target: models.lr_scheduler.LambdaWarmUpScheduler
+      params:
+        verbosity_interval: 0
+        warm_up_steps: 5000
+        lr_start: 0.0
+        lr_end: 1.0
+
+    unet_config:
+      target: ldm.modules.diffusionmodules.openaimodel.UNetModel
+      params:
+        image_size: 128
+        in_channels: 6
+        out_channels: 3
+        model_channels: 128
+        attention_resolutions: [4, 8, 16]
+        num_res_blocks: 2
+        channel_mult: [1, 2, 3, 4, 5]
+        num_heads: 1
+        resblock_updown: False
+        conv_resample: False
+
+data:
+  target: main.DataModuleFromConfig
+  params:
+    batch_size: 20
+    num_workers: 5
+    train:
+      target: dataset.parametricrefmap.ParametricRefmapDataset
+      params:
+        size: 128
+        split: train
+        return_envmap: False
+        data_root: ./data/LavalIndoor+PolyHaven_2k
+        mask_root: ./data/mvs_ortho_synth_refmap/
+        transform_func: 0p1tom1p1_normalizedLogarithmic_lowerbound1e-6
+        zdim: 6
+        epoch_cycle: 1000
+        refmap_cache_root: ./data/cache/refmap
+
+    train_sampler:
+      target: main.CustomRandomSampler
+      params:
+        same_sampling: False
+
+    validation:
+      target: dataset.parametricrefmap.ParametricRefmapDataset
+      params:
+        size: 128
+        split: val
+        return_envmap: False
+        data_root: ./data/LavalIndoor+PolyHaven_2k
+        mask_root: ./data/mvs_ortho_synth_refmap/
+        transform_func: 0p1tom1p1_normalizedLogarithmic_lowerbound1e-6
+        zdim: 6
+        epoch_cycle: 1000
+        refmap_cache_root: ./data/cache/refmap
+
+    val_sampler:
+      target: main.CustomRandomSampler
+      params:
+        same_sampling: True
+
+lightning:
+  callbacks:
+    image_logger:
+      target: main.ImageLogger
+      params:
+        batch_frequency: 1000
+        max_images: 10
+        increase_log_steps: True
+        log_images_kwargs:
+          ddim_steps: 50
+
+
+  trainer:
+    benchmark: True
+    replace_sampler_ddp: True
+    max_epoch: 4000

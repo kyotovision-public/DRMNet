@@ -1,0 +1,147 @@
+model:
+  base_learning_rate: 5.0e-5
+  target: models.drmnet.DRMNet
+  params:
+    log_every_k: 5
+    max_timesteps: 150
+    loss_type: l2
+    input_key: LrK
+    image_size: 128
+    channels: 3
+    parameterization: residual
+    cond_stage_trainable: False
+    concat_mode: True
+    scale_factor: 1.0
+    scale_by_std: False
+    monitor: 'val/loss'
+    use_ema: True
+    sigma: 0.02
+    delta: 0.025
+    gamma: 0.95
+    epsilon: 0.01
+    train_with_zk_gt: True
+    train_with_zk_gt_switch_epoch: 2000
+    l_refmap_weight: 10.0
+    l_refcode_weight: 0.1
+    brdf_param_names: ["metallic.value", "base_color.value.R", "base_color.value.G", "base_color.value.B", "roughness.value", "specular"]
+    z0: [1, 1, 1, 1, 0, 1]
+    refmap_input_scaler: 0.12
+    cache_refmap: False 
+
+    renderer_config:
+      target: utils.mitsuba3_utils.MitsubaRefMapRenderer
+      params:
+        refmap_res: 128
+        spp: 256
+        denoise: simple
+
+    scheduler_config:
+      target: models.lr_scheduler.LambdaWarmUpScheduler
+      params:
+        verbosity_interval: 0
+        warm_up_steps: 5000
+        lr_start: 0.0
+        lr_end: 1.0
+
+    illnet_config:
+      target: ldm.modules.diffusionmodules.openaimodel.UNetModel
+      params:
+        image_size: 128
+        in_channels: 6
+        out_channels: 3
+        model_channels: 128
+        attention_resolutions: [8, 16, 32]
+        num_res_blocks: 2
+        dropout: 0.0
+        channel_mult: [1, 2, 3, 4, 5, 6]
+        num_heads: 1
+        resblock_updown: False
+        conv_resample: False
+
+    refnet_config:
+      target: ldm.modules.diffusionmodules.openaimodel.EncoderUNetModel
+      params:
+        image_size: 128
+        in_channels: 6
+        model_channels: 128
+        out_channels: 6
+        num_res_blocks: 2
+        attention_resolutions: [8, 16]
+        dropout: 0.0
+        channel_mult: [1, 1, 2, 3, 4]
+        conv_resample: False
+        resblock_updown: False
+        num_heads: 1
+        use_scale_shift_norm: False
+        pool: "adaptive"
+
+data:
+  target: main.DataModuleFromConfig
+  params:
+    batch_size: 20
+    num_workers: 3
+    train:
+      target: dataset.parametricrefmap.ParametricRefmapDataset
+      params:
+        size: 128
+        split: train
+        data_root: ./data/LavalIndoor+PolyHaven_2k/
+        transform_func: log
+        zdim: 6
+        epoch_cycle: 1000
+        return_envmap: True
+        refmap_cache_root: ./data/cache/refmap/
+
+    train_sampler:
+      target: main.CustomRandomSampler
+      params:
+        same_sampling: False
+
+    validation:
+      target: dataset.parametricrefmap.ParametricRefmapDataset
+      params:
+        size: 128
+        split: val
+        data_root: ./data/LavalIndoor+PolyHaven_2k/
+        transform_func: log
+        zdim: 6
+        epoch_cycle: 1000
+        return_envmap: True
+        refmap_cache_root: ./data/cache/refmap/
+
+    val_sampler:
+      target: main.CustomRandomSampler
+      params:
+        same_sampling: True
+
+    test:
+      target: dataset.parametricrefmap.ParametricRefmapDataset
+      params:
+        size: 128
+        split: test
+        data_root: ./data/LavalIndoor+PolyHaven_2k/
+        transform_func: log
+        zdim: 6
+        epoch_cycle: 1000
+        return_envmap: True
+        refmap_cache_root: ./data/cache/refmap/
+
+    test_sampler:
+      target: main.CustomRandomSampler
+      params:
+        same_sampling: True
+
+lightning:
+  callbacks:
+    image_logger:
+      target: main.ImageLogger
+      params:
+        batch_frequency: 1000
+        max_images: 10
+        increase_log_steps: True
+
+
+  trainer:
+    benchmark: True
+    replace_sampler_ddp: True
+    max_epoch: 4000
