@@ -92,7 +92,7 @@ data/cache
 │   │    ...
 ```
 
-Also, you need download masks for reflectance maps to train ObsNet from [here](https://drive.google.com/drive/folders/1zWkmzOIIwueeUL0ryzK6FU8TtW6g4T6W) and unzip the cached data to `data/nLMVS-Synth_refmap_masks/` by running:
+Also, you need to download masks for reflectance maps to train ObsNet from [here](https://drive.google.com/drive/folders/1zWkmzOIIwueeUL0ryzK6FU8TtW6g4T6W) and unzip the cached data to `data/nLMVS-Synth_refmap_masks/` by running:
 ```bash
 unzip <PATH_TO_nLMVS-Synth_refmap_masks.zip> -d ./data/nLMVS-Synth_refmap_masks
 ```
