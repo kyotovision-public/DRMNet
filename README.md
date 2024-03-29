@@ -1,11 +1,12 @@
 # Diffusion Reflectance Map: Single-Image Stochastic Inverse Rendering of Illumination and Reflectance
 [arXiv](https://arxiv.org/abs/2312.04529)
 
-This repository provides an implementation of our paper [Diffusion Reflectance Map: Single-Image Stochastic Inverse Rendering of Illumination and Reflectance](https://arxiv.org/abs/2312.04529). If you use our code and data please cite our paper.
-This implementation is based on [Latent Diffusion Modles](https://github.com/CompVis/latent-diffusion/).
+This repository provides an implementation of our paper [Diffusion Reflectance Map: Single-Image Stochastic Inverse Rendering of Illumination and Reflectance](https://arxiv.org/abs/2312.04529).
+This implementation is based on [Latent Diffusion Modle](https://github.com/CompVis/latent-diffusion/).
 
 Please note that this is a research software and may contain bugs or other issues – please use it at your own risk. If you experience major problems with it, you may contact us, but please note that we do not have the resources to deal with all issues.
 
+Please cite the following paper, if you use any part of our code and data.
 ```
 @InProceedings{Yenyo_2022_CVPR,
     author    = {Enyo, Yuto and Nishino, Ko},
