@@ -104,9 +104,9 @@ def estimate(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("input_img", type=Path, help="The path of HDR image for an object (.exr, .hdr)")
-    parser.add_argument("input_normal", type=Path, help="The path of normal map for an object (.npy)")
-    parser.add_argument("input_mask", type=Path, help="The path of mask for an object (.png)", default=None)
+    parser.add_argument("--input_img", type=Path, help="The path of HDR image for an object (.exr, .hdr)")
+    parser.add_argument("--input_normal", type=Path, help="The path of normal map for an object (.npy)")
+    parser.add_argument("--input_mask", type=Path, help="The path of mask for an object (.png)", default=None)
     parser.add_argument(
         "--obsnet_base_path", type=Path, help="the config path for obsnet", default=Path("./configs/obsnet/eval_obsnet.yaml")
     )
