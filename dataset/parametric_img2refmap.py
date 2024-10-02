@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 import torch
 
-from models.obsnet import ObsNetDiffuion
+from models.obsnet import ObsNetDiffusion
 from utils.file_io import load_exr
 from utils.transform import thetaphi2xyz
 
@@ -61,7 +61,7 @@ class ParametricImg2RefmapDataset(BaseDataset):
         self.generator = torch.Generator()
         self.current_epoch = 0
 
-        self.model: ObsNetDiffuion = None
+        self.model: ObsNetDiffusion = None
         self.refmap_key = refmap_key
 
         self.epoch_bias = epoch_bias
