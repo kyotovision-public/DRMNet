@@ -32,7 +32,7 @@ if mi.variant() is not None:
     from utils.mitsuba3_utils import MitsubaOrthoRenderer, MitsubaRefMapRenderer
 
 
-class ObsNetDiffuion(LatentDiffusion):
+class ObsNetDiffusion(LatentDiffusion):
     """inpainting class"""
 
     def __init__(

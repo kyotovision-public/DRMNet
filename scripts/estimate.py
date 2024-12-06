@@ -19,7 +19,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 from dataset.basedataset import BaseDataset
 from ldm.util import instantiate_from_config
 from models.drmnet import DRMNet
-from models.obsnet import ObsNetDiffuion
+from models.obsnet import ObsNetDiffusion
 from utils.file_io import load_exr, load_png, save_png
 from utils.img2refmap import refmap_mask_make
 from utils.mitsuba3_utils import get_bsdf, visualize_bsdf
@@ -28,7 +28,7 @@ from utils.tonemap import hdr2ldr
 
 def estimate(
     DRMNet_model: DRMNet,
-    ObsNet_model: ObsNetDiffuion,
+    ObsNet_model: ObsNetDiffusion,
     input_img: torch.Tensor,
     input_normal: torch.Tensor,
     mask: torch.Tensor,
@@ -104,9 +104,9 @@ def estimate(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("input_img", type=Path, help="The path of HDR image for an object (.exr, .hdr)")
-    parser.add_argument("input_normal", type=Path, help="The path of normal map for an object (.npy)")
-    parser.add_argument("input_mask", type=Path, help="The path of mask for an object (.png)", default=None)
+    parser.add_argument("--input_img", type=Path, help="The path of HDR image for an object (.exr, .hdr)")
+    parser.add_argument("--input_normal", type=Path, help="The path of normal map for an object (.npy)")
+    parser.add_argument("--input_mask", type=Path, help="The path of mask for an object (.png)", default=None)
     parser.add_argument(
         "--obsnet_base_path", type=Path, help="the config path for obsnet", default=Path("./configs/obsnet/eval_obsnet.yaml")
     )
@@ -118,7 +118,7 @@ if __name__ == "__main__":
 
     # load models
     obsnet_base_config = OmegaConf.load(args.obsnet_base_path)
-    obsnet_model: ObsNetDiffuion = instantiate_from_config(obsnet_base_config.model).cuda()
+    obsnet_model: ObsNetDiffusion = instantiate_from_config(obsnet_base_config.model).cuda()
     obsnet_model.ds: BaseDataset = instantiate_from_config(obsnet_base_config.data.params.predict)
     drmnet_base_config = OmegaConf.load(args.drmnet_base_path)
     drmnet_model: DRMNet = instantiate_from_config(drmnet_base_config.model).cuda()

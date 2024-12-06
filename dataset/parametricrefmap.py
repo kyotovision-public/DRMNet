@@ -6,7 +6,7 @@ import cv2
 import torch
 
 from models.drmnet import DRMNet
-from models.obsnet import ObsNetDiffuion
+from models.obsnet import ObsNetDiffusion
 from utils.file_io import load_exr
 from utils.transform import thetaphi2xyz
 
@@ -59,7 +59,7 @@ class ParametricRefmapDataset(BaseDataset):
         self.generator = torch.Generator()
         self.current_epoch = 0
 
-        self.model: Union[DRMNet, ObsNetDiffuion] = None
+        self.model: Union[DRMNet, ObsNetDiffusion] = None
 
         self.return_cache = return_cache
         self.epoch_bias = epoch_bias
