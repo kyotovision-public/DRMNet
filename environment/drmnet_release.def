@@ -43,7 +43,7 @@ From: nvidia/cuda:11.3.1-cudnn8-devel-ubuntu20.04
     pip install --no-cache-dir albumentations pudb imageio imageio-ffmpeg scikit-image lpips
     pip install --no-cache-dir pytorch-lightning==1.9.0
     pip install --no-cache-dir omegaconf streamlit torch-fidelity einops transformers
-    pip install --no-cache-dir pynvrtc
+    pip install --no-cache-dir pynvrtc==9.2
     pip install --no-cache-dir matplotlib scikit-learn tqdm
     pip install --no-cache-dir Pillow tensorboard
     pip install --no-cache-dir pytorch-fid
@@ -51,7 +51,7 @@ From: nvidia/cuda:11.3.1-cudnn8-devel-ubuntu20.04
 
     # build mitsuba3
     cd /opt
-    git clone --branch v3.2.0 --recursive https://github.com/mitsuba-renderer/mitsuba3
+    git clone --branch v3.3.0 --recursive https://github.com/mitsuba-renderer/mitsuba3
     cd mitsuba3
     apt-get install -y clang-10 libc++-10-dev libc++abi-10-dev cmake ninja-build
     apt-get install -y libpng-dev libjpeg-dev

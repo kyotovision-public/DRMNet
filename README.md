@@ -21,7 +21,7 @@ Please cite the following paper, if you use any part of our code and data.
 
 ## Requirements
 
-We tested our code with Python 3.6 on Ubuntu 20.04 LTS using the following packages.
+We tested our code with Python 3.8 on Ubuntu 20.04 LTS using the following packages.
 
 - numpy==1.23.5
 - pytorch==1.12.1
@@ -37,7 +37,7 @@ Please refer to [environment/pip_freeze.txt](environment/pip_freeze.txt) for the
 
 You can also use `singularity` to replicate our environment:
 ```bash
-singularity build environment/drmnet.sif environment/drmnet.def
+singularity build environment/drmnet.sif environment/drmnet_release.def
 singularity run --nv environment/drmnet.sif
 ```
 
@@ -49,7 +49,7 @@ You can download the pretrained models (`drmnet.ckpt` and `obsnet.ckpt`) from [h
 You can apply the model on the sample data in the `data` directory by running the script below.
 
 ```bash
-python scripts/estimate.py ./data/sample/image.exr ./data/sample/normal.npy ./data/sample/mask.png
+python scripts/estimate.py --input_img ./data/sample/image.exr --input_normal ./data/sample/normal.npy --input_mask ./data/sample/mask.png
 ```
 
 You can view the outputs in `outputs`.
@@ -116,7 +116,7 @@ python scripts/preprocess_shape.py <PATH_TO_Shapes_Multi_5000>
 
 You can train DRMNet by running
 ```bash
-python main.py --base ./configs/inpainting/train_drmnet.yaml -t --device 0
+python main.py --base ./configs/drmnet/train_drmnet.yaml -t --device 0
 ```
 The logs and checkpoints are saved to `logs/<START_DATE_AND_TIME>_train_drmnet`.
 
@@ -124,7 +124,7 @@ The logs and checkpoints are saved to `logs/<START_DATE_AND_TIME>_train_drmnet`.
 
 You can train ObsNet by running
 ```bash
-python main.py --base ./configs/inpainting/train_obsnet.yaml -t --device 0
+python main.py --base ./configs/obsnet/train_obsnet.yaml -t --device 0
 ```
 The logs and checkpoints are saved to `./logs/<START_DATE_AND_TIME>_train_obsnet`.
 
@@ -132,7 +132,7 @@ In order to finetune the ObsNet model, you need to modify the configuration file
 The default value for `model: params: ckpt_path` is set to `./logs/xxxx-xx-xxTxx-xx-xx_train_obsnet/checkpoints/last.ckpt`.
 To finetune the network using raw reflectance maps from random object images, update this path with the above directory and run:
 ```bash
-python main.py --base ./configs/inpainting/finetune_obsnet.yaml -t --device 0
+python main.py --base ./configs/obsnet/finetune_obsnet.yaml -t --device 0
 ```
 .
 The logs and checkpoints are saved to `./logs/<START_DATE_AND_TIME>_finetune_obsnet`.
