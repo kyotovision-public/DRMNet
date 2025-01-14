@@ -410,11 +410,17 @@ class DRMNet(pl.LightningModule):
 
         return loss
 
-    def p_losses(self, Lr_k, Lr_target, z_k, z_K, K, k, illnet_cond, refnet_cond):
+    def p_losses(self, Lr_k, Lr_km1, z_k, z_K, K, k, illnet_cond, refnet_cond):
         reversed_k = K - k - 1
         if self.sigma > 0:  # forward noise
             noise = torch.randn_like(Lr_k)
             Lr_k = Lr_k + self.sigma * noise
+
+        if self.parameterization == "residual":
+            with torch.no_grad():
+                Lr_target = Lr_km1 - Lr_k
+        else:
+            raise NotImplementedError()
 
         if self.training and self.train_with_zk_gt:
             z_out = self.apply_model(self.refnet_model, Lr_k, reversed_k, refnet_cond)
@@ -700,12 +706,7 @@ class DRMNet(pl.LightningModule):
 
     def shared_step(self, batch):
         K, k, Lr_K, Lr_k, Lr_km1, zK, zk, illnet_c, refnet_c = self.get_input(batch)
-        if self.parameterization == "residual":
-            with torch.no_grad():
-                Lr_target = Lr_km1 - Lr_k
-        else:
-            raise NotImplementedError()
-        loss, loss_dict = self.p_losses(Lr_k, Lr_target, zk, zK, K, k, illnet_c, refnet_c)
+        loss, loss_dict = self.p_losses(Lr_k, Lr_km1, zk, zK, K, k, illnet_c, refnet_c)
         return loss, loss_dict
 
     def training_step(self, batch, batch_idx):
